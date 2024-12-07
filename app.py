@@ -1,16 +1,18 @@
-from flask import Flask, render_template, request, redirect, url_for, send_file
+from flask import Flask, render_template, request, redirect, send_file
 import os
 import cv2
 import numpy as np
 import base64
-from io import BytesIO
-from PIL import Image
 
 app = Flask(__name__)
 
 # Set the upload folder
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Ensure the upload folder exists
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
 
 def gamma_transformation(image, gamma, c=1):
     image_normalised = image / 255.0
@@ -47,6 +49,7 @@ def image_to_base64(image):
 @app.route('/')
 def index():
     return render_template('index.html')
+
 @app.route('/upload', methods=['POST'])
 def upload_image():
     if 'file' not in request.files:
@@ -58,25 +61,35 @@ def upload_image():
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
     file.save(file_path)
 
+    # Load image as grayscale
     image = cv2.imread(file_path, cv2.IMREAD_GRAYSCALE)
+    if image is None:
+        return "Error reading image", 400
 
     operation = request.form.get('operation')
 
+    # Perform operation based on the user selection
     if operation == 'Negative':
         result_image = negative(image)
     elif operation == 'Contrast Stretching':
         result_image = contrast_stretching(image)
     elif operation == 'Resized':
-        width = int(request.form.get('width'))
-        height = int(request.form.get('height'))
-        result_image = resize_image(image, width, height)
+        try:
+            width = int(request.form.get('width'))
+            height = int(request.form.get('height'))
+            result_image = resize_image(image, width, height)
+        except ValueError:
+            return "Invalid width or height", 400
     elif operation == 'Equalized Histogram':
         result_image = equalized_histogram(image)
     elif operation == 'Log Transformation':
         result_image = log_transformation(image)
     elif operation == 'Gamma Transformation':
-        gamma = float(request.form.get('gamma'))
-        result_image = gamma_transformation(image, gamma)
+        try:
+            gamma = float(request.form.get('gamma'))
+            result_image = gamma_transformation(image, gamma)
+        except ValueError:
+            return "Invalid gamma value", 400
     else:
         result_image = image
 
@@ -88,7 +101,6 @@ def upload_image():
 
     return render_template('result.html', img_data=img_base64, operation=operation, file_path=processed_filename)
 
-
 @app.route('/download/<filename>')
 def download_image(filename):
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
@@ -97,7 +109,5 @@ def download_image(filename):
     else:
         return "File not found!", 404
 
-
 if __name__ == '__main__':
-    os.makedirs(UPLOAD_FOLDER, exist_ok=True)  # Ensure the upload folder exists
     app.run(debug=True)
