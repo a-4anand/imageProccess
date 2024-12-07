@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Enhancement</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+
+            background-image: linear-gradient(to right, #3ab5b0 0%, #3d99be 31%, #56317a 100%);
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            padding: 0 50px;
+        }
+
+        .container {
+            background: rgba(25, 25, 25, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            padding: 30px;
+            max-width: 500px;
+            width: 40%;
+            text-align: left;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #f8f8f8;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 1rem;
+            margin-bottom: 5px;
+            color: #ccc;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        input[type="file"], select {
+            background-color: #333;
+            color: #fff;
+        }
+
+        button {
+            background: linear-gradient(135deg, #1db954, #1ed760);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #1ed760, #1db954);
+            transform: scale(1.05);
+        }
+
+        #resize-options, #gamma-options {
+            display: none;
+        }
+
+        .credits {
+            font-size: 2rem;
+            color: #ddd;
+            position: absolute;
+            right: 50px;
+            text-align: right;
+            transform: translateY(-50%);
+            top: 50%;
+        }
+
+        .credits span {
+            color: #1ed760;
+            font-weight: bold;
+        }
+
+
+
+        @media (max-width: 768px) {
+    .credits {
+        position: static;
+        text-align: center;
+        font-size: 1rem;
+        margin-top: 20px;
+    }
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Image Enhancement Operations</h1>
+        <form action="/upload" method="POST" enctype="multipart/form-data">
+            <label for="file">Choose an Image:</label>
+            <input type="file" name="file" accept="image/*" required>
+
+            <label for="operation">Choose Operation:</label>
+            <select name="operation">
+                <option value="Negative">Negative</option>
+                <option value="Contrast Stretching">Contrast Stretching</option>
+                <option value="Resized">Resize</option>
+                <option value="Equalized Histogram">Equalized Histogram</option>
+                <option value="Log Transformation">Log Transformation</option>
+                <option value="Gamma Transformation">Gamma Transformation</option>
+            </select>
+
+            <div id="resize-options">
+                <label for="width">Width:</label>
+                <input type="number" name="width" min="100" max="2000">
+                <label for="height">Height:</label>
+                <input type="number" name="height" min="100" max="2000">
+            </div>
+
+            <div id="gamma-options">
+                <label for="gamma">Gamma:</label>
+                <input type="number" name="gamma" step="0.1" min="0.1" max="10.0">
+            </div>
+
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+    <div class="credits">
+        Made with ❤️ by <span>Anand Dubey</span>
+    </div>
+
+    <script>
+        const operationSelect = document.querySelector('select[name="operation"]');
+        const resizeOptions = document.getElementById('resize-options');
+        const gammaOptions = document.getElementById('gamma-options');
+
+        operationSelect.addEventListener('change', function() {
+            if (this.value === 'Resized') {
+                resizeOptions.style.display = 'block';
+                gammaOptions.style.display = 'none';
+            } else if (this.value === 'Gamma Transformation') {
+                gammaOptions.style.display = 'block';
+                resizeOptions.style.display = 'none';
+            } else {
+                resizeOptions.style.display = 'none';
+                gammaOptions.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
